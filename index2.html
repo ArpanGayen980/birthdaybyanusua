@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Rani | A Magical Surprise</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS for Layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js for 3D Elements -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary-gold: #d4af37;
+            --accent-pink: #ff69b4;
+            --deep-purple: #1a0b2e;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background-color: var(--deep-purple);
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            scroll-behavior: smooth;
+        }
+
+        /* Animated Gradient Background */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #2e1065 0%, #1a0b2e 100%);
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: drift 20s infinite alternate;
+        }
+
+        @keyframes drift {
+            from { transform: translate(-10%, -10%) scale(1); }
+            to { transform: translate(10%, 10%) scale(1.2); }
+        }
+
+        /* Intro Screen */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease-out;
+        }
+
+        .typing-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            border-right: 2px solid var(--primary-gold);
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+        }
+
+        /* 3D Container */
+        #canvas-container {
+            width: 100%;
+            height: 60vh;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .box-label {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--primary-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Surprise Content */
+        #surprise-content {
+            display: none;
+            opacity: 0;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .photo-frame {
+            position: relative;
+            width: 150px;
+            height: 200px;
+            border: 4px solid white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-frame:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 50;
+        }
+
+        .fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        /* Floating Animation */
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Lightbox */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #lightbox.active {
+            display: flex;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-magical {
+            background: linear-gradient(45deg, var(--primary-gold), #f3e5ab);
+            color: #1a0b2e;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-magical:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.6);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #fff, var(--primary-gold), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Effects -->
+    <div class="bg-glow">
+        <div class="orb" style="width: 400px; height: 400px; background: #4c1d95; top: -100px; right: -100px;"></div>
+        <div class="orb" style="width: 300px; height: 300px; background: #831843; bottom: -50px; left: -50px;"></div>
+        <div id="particles-container" class="absolute inset-0"></div>
+    </div>
+
+    <!-- Intro Suspense -->
+    <div id="intro-overlay">
+        <div class="typing-text" id="intro-text">Wait... Something special is coming...</div>
+        <div class="mt-8 flex space-x-2">
+            <div class="w-3 h-3 bg-gold rounded-full animate-bounce" style="background: var(--primary-gold); animation-delay: 0.1s"></div>
+            <div class="w-3 h-3 bg-gold rounded-full animate-bounce" style="background: var(--primary-gold); animation-delay: 0.2s"></div>
+            <div class="w-3 h-3 bg-gold rounded-full animate-bounce" style="background: var(--primary-gold); animation-delay: 0.3s"></div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="relative z-10 min-h-screen flex flex-col items-center pt-10 px-4">
+        
+        <!-- Header -->
+        <header class="text-center mb-8 opacity-0" id="main-header">
+            <h1 class="text-5xl md:text-7xl font-bold mb-2 gradient-text font-serif italic">Rani</h1>
+            <p class="text-gray-300 tracking-[0.3em] uppercase text-sm">A Journey of Light and Love</p>
+        </header>
+
+        <!-- 3D Gift Box Section -->
+        <section id="gift-section" class="w-full max-w-2xl flex flex-col items-center">
+            <div id="canvas-container">
+                <div class="box-label">Tap to Unbox Your Surprise</div>
+            </div>
+        </section>
+
+        <!-- Surprise Content (Revealed after unboxing) -->
+        <section id="surprise-content" class="w-full max-w-4xl py-20 flex flex-col items-center space-y-20">
+            
+            <!-- Photo Gallery -->
+            <div class="relative w-full h-[400px] flex items-center justify-center" id="photo-gallery">
+                <!-- Fallback images: replace with real URLs -->
+                <div class="photo-frame absolute -rotate-6 translate-x-[-120px] translate-y-[-20px]" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="myimage1.jpeg" alt="Rani 1" class="w-full h-full object-cover">
+                </div>
+                <div class="photo-frame absolute rotate-3 translate-x-[-40px] translate-y-[30px]" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="myimage2.jpeg" alt="Rani 2" class="w-full h-full object-cover">
+                </div>
+                <div class="photo-frame absolute -rotate-2 translate-x-[60px] translate-y-[-40px]" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="myimage3.jpeg" alt="Rani 3" class="w-full h-full object-cover">
+                </div>
+                <div class="photo-frame absolute rotate-12 translate-x-[140px] translate-y-[10px]" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="myimage4.jpeg" alt="Rani 4" class="w-full h-full object-cover">
+                </div>
+            </div>
+
+            <!-- Emotional Message -->
+            <div class="glass-card p-8 md:p-12 text-center max-w-2xl w-full">
+                <div id="birthday-msg" class="text-xl md:text-2xl leading-relaxed font-serif italic text-pink-100">
+                    <!-- Typing effect will go here -->
+                </div>
+            </div>
+
+            <!-- Life Lesson -->
+            <div class="glass-card p-8 border-l-4 border-gold text-left max-w-xl w-full transform hover:scale-105 transition-transform">
+                <h3 class="text-gold font-bold mb-4 uppercase tracking-widest text-sm flex items-center">
+                    <span class="mr-2">✨</span> Life Lesson
+                </h3>
+                <p class="text-gray-200 italic leading-loose">
+                    "Sometimes life feels slow or unfair, but trust the timing. Everything beautiful takes time. Stay strong, your moment will come."
+                </p>
+            </div>
+
+            <!-- Extra Surprise Button -->
+            <div class="text-center py-10">
+                <button class="btn-magical" onclick="extraSurprise()">Click for Another Surprise</button>
+            </div>
+
+        </header>
+
+        <!-- Footer -->
+        <footer class="py-10 text-center text-gray-500 text-xs tracking-widest">
+            MADE WITH ❤️ BY <span class="text-gold">ARPAN GAYEN</span>
+        </footer>
+    </main>
+
+    <!-- UI Components -->
+    <div id="lightbox" onclick="this.classList.remove('active')">
+        <img id="lightbox-img" src="" alt="Zoomed">
+    </div>
+
+    <canvas id="fireworks" class="fireworks-canvas"></canvas>
+
+    <script>
+        // --- State and Config ---
+        let scene, camera, renderer, box, lid;
+        let isOpened = false;
+        const introText = "Wait... Something special is coming...";
+        const mainMessage = "Your beauty is stunning the world.\n\nYou are in the wrong time, just wait — everything will be good as you wish, dear Rani.\n\nSo many joyful days are waiting for you.\n\nHappy day to come into the earth.\n\nMay your wishes come true.";
+
+        // --- Initial Load Sequence ---
+        window.onload = () => {
+            initIntro();
+            initThree();
+            initParticles();
+            initFireworks();
+        };
+
+        function initIntro() {
+            const el = document.getElementById('intro-text');
+            gsap.to(el, {
+                width: "100%",
+                duration: 3,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    setTimeout(() => {
+                        gsap.to("#intro-overlay", { 
+                            opacity: 0, 
+                            duration: 1, 
+                            onComplete: () => {
+                                document.getElementById('intro-overlay').style.display = 'none';
+                                showHeader();
+                            }
+                        });
+                    }, 1000);
+                }
+            });
+        }
+
+        function showHeader() {
+            gsap.to("#main-header", { opacity: 1, y: 20, duration: 1.5, ease: "back.out" });
+        }
+
+        // --- 3D Surprise Box (Three.js) ---
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 5;
+            camera.position.y = 1;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const pointLight = new THREE.PointLight(0xd4af37, 2);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+
+            // Box Materials
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0x4c1d95, roughness: 0.3, metalness: 0.8 });
+            const lidMat = new THREE.MeshStandardMaterial({ color: 0x5b21b6, roughness: 0.2, metalness: 0.9 });
+            const ribbonMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.1, metalness: 1 });
+
+            // Box Body
+            const bodyGeo = new THREE.BoxGeometry(2, 1.5, 2);
+            box = new THREE.Mesh(bodyGeo, boxMat);
+            
+            // Lid
+            const lidGeo = new THREE.BoxGeometry(2.2, 0.4, 2.2);
+            lid = new THREE.Mesh(lidGeo, lidMat);
+            lid.position.y = 0.95;
+
+            // Ribbons
+            const ribbonVGeo = new THREE.BoxGeometry(0.3, 1.55, 2.05);
+            const ribbonV = new THREE.Mesh(ribbonVGeo, ribbonMat);
+            box.add(ribbonV);
+
+            const ribbonHGeo = new THREE.BoxGeometry(2.05, 1.55, 0.3);
+            const ribbonH = new THREE.Mesh(ribbonHGeo, ribbonMat);
+            box.add(ribbonH);
+
+            const lidRibbonV = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 2.25), ribbonMat);
+            lid.add(lidRibbonV);
+            const lidRibbonH = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.45, 0.35), ribbonMat);
+            lid.add(lidRibbonH);
+
+            scene.add(box);
+            scene.add(lid);
+
+            // Interaction
+            container.addEventListener('click', openBox);
+            container.addEventListener('touchstart', (e) => { e.preventDefault(); openBox(); });
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (!isOpened) {
+                box.rotation.y += 0.01;
+                lid.rotation.y += 0.01;
+                lid.position.y = 0.95 + Math.sin(Date.now() * 0.002) * 0.05;
+            }
+            renderer.render(scene, camera);
+        }
+
+        function openBox() {
+            if (isOpened) return;
+            isOpened = true;
+
+            // Animation for lid
+            gsap.to(lid.position, { y: 4, duration: 1.2, ease: "power2.out" });
+            gsap.to(lid.rotation, { x: 2, z: 1, duration: 1.5 });
+            gsap.to(lid.scale, { x: 0, y: 0, z: 0, duration: 1.5 });
+            
+            // Camera move
+            gsap.to(camera.position, { z: 7, y: 3, duration: 2 });
+
+            // Glow burst
+            const burstLight = new THREE.PointLight(0xffffff, 5, 10);
+            scene.add(burstLight);
+
+            // Start Fireworks & Reveal
+            triggerConfetti();
+            startFireworks();
+            revealSurprise();
+
+            document.querySelector('.box-label').style.opacity = '0';
+        }
+
+        function revealSurprise() {
+            const content = document.getElementById('surprise-content');
+            content.style.display = 'flex';
+            gsap.to(content, { opacity: 1, duration: 2 });
+
+            // Photo frames pop out
+            gsap.from(".photo-frame", {
+                scale: 0,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.3,
+                ease: "back.out(1.7)"
+            });
+
+            // Start Message Typing
+            typeMessage();
+            
+            // Scroll down automatically
+            setTimeout(() => {
+                window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+            }, 1000);
+        }
+
+        // --- Typing Animation ---
+        function typeMessage() {
+            const el = document.getElementById('birthday-msg');
+            let i = 0;
+            el.innerHTML = "";
+            
+            function type() {
+                if (i < mainMessage.length) {
+                    el.innerHTML += mainMessage.charAt(i) === "\n" ? "<br>" : mainMessage.charAt(i);
+                    i++;
+                    setTimeout(type, 40);
+                }
+            }
+            type();
+        }
+
+        // --- Particles System (Canvas) ---
+        function initParticles() {
+            const container = document.getElementById('particles-container');
+            for(let i=0; i<50; i++) {
+                const p = document.createElement('div');
+                p.className = 'absolute rounded-full bg-white opacity-20 pointer-events-none';
+                const size = Math.random() * 4 + 2;
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.left = `${Math.random() * 100}%`;
+                p.style.top = `${Math.random() * 100}%`;
+                container.appendChild(p);
+
+                gsap.to(p, {
+                    y: -100 - Math.random() * 200,
+                    x: (Math.random() - 0.5) * 50,
+                    opacity: 0,
+                    duration: 5 + Math.random() * 5,
+                    repeat: -1,
+                    delay: Math.random() * 5
+                });
+            }
+        }
+
+        // --- Fireworks Logic ---
+        const fwCanvas = document.getElementById('fireworks');
+        const ctx = fwCanvas.getContext('2d');
+        let particles = [];
+
+        function initFireworks() {
+            fwCanvas.width = window.innerWidth;
+            fwCanvas.height = window.innerHeight;
+            window.addEventListener('resize', () => {
+                fwCanvas.width = window.innerWidth;
+                fwCanvas.height = window.innerHeight;
+            });
+        }
+
+        class FireworkPart {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 8,
+                    y: (Math.random() - 0.5) * 8
+                };
+                this.alpha = 1;
+                this.friction = 0.95;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+        }
+
+        function createExplosion(x, y) {
+            const colors = ['#d4af37', '#ff69b4', '#ffffff', '#831843'];
+            for(let i=0; i<40; i++) {
+                particles.push(new FireworkPart(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }
+
+        function startFireworks() {
+            function loop() {
+                ctx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+                if(Math.random() < 0.05) {
+                    createExplosion(Math.random() * fwCanvas.width, Math.random() * fwCanvas.height * 0.5);
+                }
+                particles = particles.filter(p => p.alpha > 0);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function triggerConfetti() {
+            // Simulated simple confetti with GSAP
+            for(let i=0; i<100; i++) {
+                const c = document.createElement('div');
+                c.className = 'fixed pointer-events-none z-[100]';
+                c.style.width = '10px';
+                c.style.height = '10px';
+                c.style.backgroundColor = ['#d4af37', '#ff69b4', '#fff'][Math.floor(Math.random() * 3)];
+                c.style.left = '50%';
+                c.style.top = '40%';
+                document.body.appendChild(c);
+
+                gsap.to(c, {
+                    x: (Math.random() - 0.5) * window.innerWidth,
+                    y: (Math.random() - 0.5) * window.innerHeight,
+                    rotation: Math.random() * 720,
+                    duration: 2 + Math.random() * 2,
+                    opacity: 0,
+                    onComplete: () => c.remove()
+                });
+            }
+        }
+
+        // --- Lightbox ---
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lb.classList.add('active');
+        }
+
+        // --- Extra Surprise ---
+        function extraSurprise() {
+            const messages = [
+                "You are truly one in a billion! ❤️",
+                "A shower of stars for you! ✨",
+                "Keep smiling, Rani, the world needs your light!",
+                "Today is just the beginning of your best year yet!"
+            ];
+            
+            // Create floating hearts
+            for(let i=0; i<15; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                heart.className = 'fixed text-2xl pointer-events-none z-[100]';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.bottom = '-50px';
+                document.body.appendChild(heart);
+                
+                gsap.to(heart, {
+                    y: -window.innerHeight - 100,
+                    x: (Math.random() - 0.5) * 200,
+                    rotation: Math.random() * 360,
+                    duration: 3 + Math.random() * 3,
+                    onComplete: () => heart.remove()
+                });
+            }
+
+            // Show random message alert (Custom Styled)
+            const popup = document.createElement('div');
+            popup.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 glass-card p-6 z-[3000] text-center font-bold text-gold border-2 border-gold';
+            popup.innerHTML = messages[Math.floor(Math.random() * messages.length)];
+            document.body.appendChild(popup);
+            
+            gsap.from(popup, { scale: 0, opacity: 0, duration: 0.5, ease: "back.out" });
+            setTimeout(() => {
+                gsap.to(popup, { opacity: 0, scale: 0.5, duration: 0.5, onComplete: () => popup.remove() });
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
